@@ -58,6 +58,58 @@ titleGradient.Color = ColorSequence.new({
 titleGradient.Rotation = 90
 titleGradient.Parent = titleBar
 
+-- TOGGLE BUTTON
+local toggleButton = Instance.new("TextButton")
+toggleButton.Name = "ToggleButton"
+toggleButton.Size = UDim2.new(0, 34, 0, 34)
+toggleButton.Position = UDim2.new(1, -60, 1, -382)
+toggleButton.AnchorPoint = Vector2.new(0, 0)
+toggleButton.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
+toggleButton.BorderSizePixel = 0
+toggleButton.Text = "+"
+toggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.TextSize = 20
+toggleButton.Parent = screenGui
+
+toggleButton.Active = true
+
+local toggleButtonCorner = Instance.new("UICorner")
+toggleButtonCorner.CornerRadius = UDim.new(0, 12)
+toggleButtonCorner.Parent = toggleButton
+
+local toggleDragging = false
+local toggleDragInput
+local toggleDragStart
+local toggleStartPos
+
+toggleButton.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        toggleDragging = true
+        toggleDragStart = input.Position
+        toggleStartPos = toggleButton.Position
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input, gameProcessed)
+    if toggleDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - toggleDragStart
+        toggleButton.Position = toggleStartPos + UDim2.new(0, delta.X, 0, delta.Y)
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input, gameProcessed)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        toggleDragging = false
+    end
+end)
+
+toggleButton.MouseButton1Click:Connect(function()
+    isMinimized = not isMinimized
+    updateMinimizeState()
+end)
+
 -- LOG DISPLAY TEXTBOX
 local logDisplay = Instance.new("TextLabel")
 logDisplay.Name = "LogDisplay"
@@ -108,7 +160,8 @@ local isMinimized = false
 local delayFrameRef = nil
 
 local function updateMinimizeState()
-    screenGui.Enabled = not isMinimized
+    mainFrame.Visible = not isMinimized
+    blurEffect.Enabled = not isMinimized
 end
 
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
